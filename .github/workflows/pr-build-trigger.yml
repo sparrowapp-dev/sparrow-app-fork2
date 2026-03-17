@@ -65,7 +65,8 @@ jobs:
           fi
 
           echo "Build type: $BUILD_TYPE"
-          echo "build_type=$BUILD_TYPE" >> $GITHUB_OUTPUT
+
+          core.setOutput("build_type", BUILD_TYPE);
 
           echo "✅ Trigger validation passed."
 
