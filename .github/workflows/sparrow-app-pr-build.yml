@@ -562,12 +562,6 @@ jobs:
 
     steps:
 
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          repository: sparrowapp-dev/sparrow-app
-          ref: main
-
       - name: Setup kubectl
         uses: azure/setup-kubectl@v2.0
 
@@ -581,10 +575,90 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          # Substitute environment variables and apply manifests
-          envsubst < .github/k8s/pr-preview/deployment.yaml | kubectl apply -f -
-          envsubst < .github/k8s/pr-preview/service.yaml | kubectl apply -f -
-          envsubst < .github/k8s/pr-preview/ingress.yaml | kubectl apply -f -
+          # Apply Deployment
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: sparrow-web-preview-pr-${PR_NUMBER}
+            namespace: sparrow-dev
+            labels:
+              app: sparrow-web-preview
+              pr: "${PR_NUMBER}"
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: sparrow-web-preview-pr-${PR_NUMBER}
+            template:
+              metadata:
+                labels:
+                  app: sparrow-web-preview-pr-${PR_NUMBER}
+              spec:
+                containers:
+                - name: sparrow-web
+                  image: sparrowprod.azurecr.io/sparrow-web:${IMAGE_TAG}
+                  ports:
+                  - containerPort: 80
+                  resources:
+                    requests:
+                      memory: "128Mi"
+                      cpu: "100m"
+                    limits:
+                      memory: "256Mi"
+                      cpu: "200m"
+          EOF
+
+          # Apply Service
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: sparrow-web-preview-pr-${PR_NUMBER}
+            namespace: sparrow-dev
+            labels:
+              app: sparrow-web-preview
+              pr: "${PR_NUMBER}"
+          spec:
+            selector:
+              app: sparrow-web-preview-pr-${PR_NUMBER}
+            ports:
+            - port: 80
+              targetPort: 80
+            type: ClusterIP
+          EOF
+
+          # Apply Ingress
+          cat <<EOF | kubectl apply -f -
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: sparrow-web-preview-pr-${PR_NUMBER}
+            namespace: sparrow-dev
+            labels:
+              app: sparrow-web-preview
+              pr: "${PR_NUMBER}"
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              kubernetes.io/ingress.class: nginx
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+          spec:
+            tls:
+            - hosts:
+              - pr-${PR_NUMBER}.preview.sparrowapp.dev
+              secretName: preview-pr-${PR_NUMBER}-tls
+            rules:
+            - host: pr-${PR_NUMBER}.preview.sparrowapp.dev
+              http:
+                paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: sparrow-web-preview-pr-${PR_NUMBER}
+                      port:
+                        number: 80
+          EOF
 
       - name: Wait for rollout
         run: |
@@ -645,4 +719,3 @@ jobs:
             ]
           }" "${{ secrets.TEAMS_INCOMING_WEBHOOK_URL}}"
         shell: bash      
-        
