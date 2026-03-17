@@ -29,11 +29,12 @@ jobs:
       sha:        ${{ steps.pr_info.outputs.sha }}
       pr_number:  ${{ steps.pr_info.outputs.pr_number }}
       repo:       ${{ steps.pr_info.outputs.repo }}
-      build_type: ${{ steps.validate.outputs.build_type }}
+      build_type: ${{ steps.validate_trigger.outputs.build_type }}
 
     steps:
       # Step 1 — Ensure this is a /build comment on a PR (not a plain issue)
       - name: Validate trigger
+        id: validate_trigger
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
           EVENT_NAME:   ${{ github.event_name }}
@@ -65,8 +66,7 @@ jobs:
           fi
 
           echo "Build type: $BUILD_TYPE"
-
-          core.setOutput("build_type", BUILD_TYPE);
+          echo "build_type=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
           echo "✅ Trigger validation passed."
 
@@ -92,16 +92,19 @@ jobs:
             const sha       = pr.data.head.sha;
             const repo      = pr.data.head.repo.full_name;
             const pr_number = pr.data.number;
+            const build_type = "${{ steps.validate_trigger.outputs.build_type }}";
 
             console.log(`Branch    : ${branch}`);
             console.log(`SHA       : ${sha}`);
             console.log(`Repo      : ${repo}`);
             console.log(`PR Number : ${pr_number}`);
+            console.log(`Build Type: ${build_type}`);
 
             core.setOutput("branch",    branch);
             core.setOutput("sha",       sha);
             core.setOutput("repo",      repo);
             core.setOutput("pr_number", pr_number);
+            core.setOutput("build_type", build_type);
 
       # Step 4 — Install yq to parse the YAML whitelist
       - name: Install yq
@@ -272,4 +275,3 @@ jobs:
                 "Please check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details."
               ].join("\n")
             });
- 
