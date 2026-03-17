@@ -563,12 +563,7 @@ jobs:
     steps:
 
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-
-      - name: Setup kubelogin
-        uses: azure/use-kubelogin@v1
-        with:
-          kubelogin-version: 'latest'
+        uses: azure/setup-kubectl@v2.0
 
       - name: Set Kubernetes context
         uses: Azure/k8s-set-context@v2
