@@ -566,7 +566,7 @@ jobs:
         uses: azure/setup-kubectl@v3
 
       - name: Setup kubelogin
-        uses: azure/kubelogin@v1
+        uses: azure/use-kubelogin@v1
         with:
           kubelogin-version: 'latest'
 
@@ -639,4 +639,3 @@ jobs:
             ]
           }" "${{ secrets.TEAMS_INCOMING_WEBHOOK_URL}}"
         shell: bash      
-        
