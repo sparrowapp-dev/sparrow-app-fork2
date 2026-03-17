@@ -18,8 +18,7 @@ on:
         type: string  
       build_type:
         description: 'Build type'
-        required: false
-        default: "pr"
+        required: true
         type: string    
 
 env:
