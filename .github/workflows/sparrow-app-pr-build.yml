@@ -565,6 +565,11 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
 
+      - name: Setup kubelogin
+        uses: azure/kubelogin@v1
+        with:
+          kubelogin-version: 'latest'
+
       - name: Set Kubernetes context
         uses: Azure/k8s-set-context@v2
         with:
