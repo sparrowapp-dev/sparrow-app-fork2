@@ -645,10 +645,10 @@ jobs:
           spec:
             tls:
             - hosts:
-              - pr-${PR_NUMBER}.preview.sparrowapp.dev
+              - pr-${PR_NUMBER}preview.sparrowapp.dev
               secretName: preview-pr-${PR_NUMBER}-tls
             rules:
-            - host: pr-${PR_NUMBER}.preview.sparrowapp.dev
+            - host: pr-${PR_NUMBER}preview.sparrowapp.dev
               http:
                 paths:
                 - path: /
@@ -668,7 +668,7 @@ jobs:
       - name: Post Web Preview Link to Teams
         run: |
           PR_NUMBER="${{ inputs.pr_number }}"
-          PREVIEW_URL="https://pr-${PR_NUMBER}.preview.sparrowapp.dev"
+          PREVIEW_URL="https://pr-${PR_NUMBER}preview.sparrowapp.dev"
 
           curl -H "Content-Type: application/json" -d "{
             \"type\": \"message\",
