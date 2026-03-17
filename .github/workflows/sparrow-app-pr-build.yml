@@ -16,11 +16,6 @@ on:
         description: 'Pull Request number'
         required: true
         type: string  
-      build_type:
-        description: 'Build type'
-        required: false
-        default: "pr"
-        type: string  
 
 env:
   VITE_API_URL: ${{ vars.VITE_API_URL_DEV }}
