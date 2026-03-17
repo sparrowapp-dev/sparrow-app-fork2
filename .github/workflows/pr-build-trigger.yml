@@ -73,7 +73,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
-          ref: main
+          ref: ${{ needs.validate.outputs.branch }}
 
       # Step 3 — Fetch PR metadata (branch, SHA, number) via GitHub API
       - name: Get PR info
