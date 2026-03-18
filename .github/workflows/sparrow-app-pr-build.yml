@@ -581,11 +581,13 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          # Substitute variables and apply manifests
+          # Apply manifests
           envsubst < .github/k8s/pr-preview/deployment.yaml | kubectl apply -f -
           envsubst < .github/k8s/pr-preview/service.yaml | kubectl apply -f -
           envsubst < .github/k8s/pr-preview/ingress.yaml | kubectl apply -f -
-          
+
+      - name: Print Preview URL
+        run: |
           echo ""
           echo "=============================================="
           echo "🚀 PR Preview URL:"
