@@ -581,38 +581,15 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          # Apply manifests
+          # Substitute variables and apply manifests
           envsubst < .github/k8s/pr-preview/deployment.yaml | kubectl apply -f -
           envsubst < .github/k8s/pr-preview/service.yaml | kubectl apply -f -
           envsubst < .github/k8s/pr-preview/ingress.yaml | kubectl apply -f -
-
-      - name: Print Preview URL
-        run: |
-          echo ""
-          echo "=============================================="
-          echo "🚀 PR Preview URL:"
-          echo "https://pr-${{ inputs.pr_number }}.preview.sparrowapp.dev"
-          echo "=============================================="
-          echo ""
 
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/sparrow-web-preview-pr-${{ inputs.pr_number }} \
           --namespace=sparrow-dev --timeout=300s
-
-      - name: Output Preview URL
-        run: |
-          PREVIEW_URL="https://pr-${{ inputs.pr_number }}.preview.sparrowapp.dev"
-          
-          echo "## 🌐 PR Preview Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Preview URL:** [${PREVIEW_URL}](${PREVIEW_URL})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| PR Number | #${{ inputs.pr_number }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | ${{ inputs.branch }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Repository | ${{ inputs.repository }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Post Web Preview Link to Teams
         run: |
